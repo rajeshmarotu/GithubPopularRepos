@@ -1,12 +1,13 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, ActivityIndicator,ImageBackground, Image, FlatList, TouchableOpacity, Linking } from 'react-native';
-import { List, ListItem } from 'react-native-elements';
+import { List, ListItem, Icon } from 'react-native-elements';
+
 
 import { Header } from './src/components/Header.component';
 
 const options = {
    headers: {
-            'Authorization': 'token YOUR_PERSONAL_ACCESS_TOKEN'
+            'Authorization': 'token 2655bdfb22653d1f4a5f4c08a819fa62479a1a7e'
           }
 }
 
@@ -107,11 +108,11 @@ export default class App extends Component {
 
   renderSplashScreen(){
     return (
-      <ImageBackground source={require('./assets/images/white_bg.jpeg')} style={{width: '100%', height: '100%'}}>
+      <ImageBackground source={require('./assets/images/white_bg.jpg')} style={{width: '100%', height: '100%'}}>
         <View style={{padding:'10%',justifyContent:'center',alignItems:'center'}}>
             <Image
-              style={{width:'35%', height:'35%',marginTop:'50%',alignSelf:'center'}}
-              source={{uri: 'https://facebook.github.io/react-native/docs/assets/favicon.png'}}
+              style={{width:'50%', height:'40%',marginTop:'50%',alignSelf:'center'}}
+              source={require('./assets/images/github.png')}
             />
             <Text style={{fontSize:30,marginTop:'5%'}}>
               GitHub
@@ -219,11 +220,25 @@ export default class App extends Component {
     console.log("renderItem"+index);
     var l = [0,1,2,3,4]
     return (
-        <View  key={language} style={{flexDirection:'column',paddingVertical:'2%'}}>
-          <View style={{flex:0.2,backgroundColor:'#cdcdcd'}}>
-            <TouchableOpacity onPress={()=> {this.toggleRepos(language,index);this.loadRepoData(items.length,language,index)}}>
+        <View  key={language} style={{flexDirection:'column',paddingTop:'1%'}}>
+          <View style={{flex:0.2,backgroundColor:'#cdcdcd',flexDirection:'row'}}>
+            <View style={{flex:0.8,paddingVertical:'3%',paddingLeft:'2%'}}>
               <Text style={{fontSize:24,fontWeight:'600',color:'#fff'}}>#{index+1}&nbsp;&nbsp;{language}</Text>
-            </TouchableOpacity>
+            </View>
+            <View style={{flex:0.2,alignItems:'center'}}>
+              <Icon
+                raised
+                name={this.state.isClicked[language]==true?'chevron-up':'chevron-down'}
+                type='font-awesome'
+                color={this.state.isClicked[language]==true?'black':'#cdcdcd'}
+                size={20}
+                onPress={() => { this.toggleRepos(language,index);this.loadRepoData(items.length,language,index) }} />
+            </View>
+            {
+              // <TouchableOpacity onPress={()=> {this.toggleRepos(language,index);this.loadRepoData(items.length,language,index)}}>
+              //   <Text style={{fontSize:24,fontWeight:'600',color:'#fff'}}>#{index+1}&nbsp;&nbsp;{language}</Text>
+              // </TouchableOpacity>
+            }
           </View>
 
               <View key={language+"#repos"} ref={(ref) => this.repoView[index] = ref}  style={{flex:0.8,flexDirection:'column'}}>
@@ -236,7 +251,7 @@ export default class App extends Component {
                 }
                 {
                   items.length==0 && this.state.isClicked[language]==true && this.state.dataSource.filter(item=>{ return item.language==language})[0].isLoaded == false &&(
-                    <ActivityIndicator size="large" color="#0000ff" />
+                    <ActivityIndicator size="large" color="#0000ff"/>
                   )
                 }
               </View>
@@ -270,13 +285,14 @@ export default class App extends Component {
           <View style={{flex:0.15}}>
             <Header />
           </View>
-          <View style={{flex:0.85,flexDirection:'column'}}>
+          <View style={{flex:0.85,flexDirection:'column',paddingHorizontal:'2%',marginBottom:'1%'}}>
             <View style={{flexDirection:'column'}}>
               <FlatList
                 keyExtractor={this.keyExtractor}
                 data={this.state.dataSource}
                 renderItem={this.renderRepositoriesLanguageWise}
                 extraData={this.state}
+                showsVerticalScrollIndicator={false}
               />
             </View>
           </View>

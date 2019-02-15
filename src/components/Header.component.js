@@ -6,11 +6,11 @@ export const Header = () => {
     <View style={[styles.shadowStyle,{flexDirection:'row',paddingHorizontal:'5%',paddingTop:'5%'}]}>
       <View style={{flex:0.2}}>
         <Image
-          style={{width:'70%', height:'60%'}}
-          source={{uri: 'https://facebook.github.io/react-native/docs/assets/favicon.png'}}
+          style={{width:'80%', height:'70%',padding:'10%'}}
+          source={require('../../assets/images/github.png')}
         />
       </View>
-      <View style={{flexDirection:'row',flex:0.8}}>
+      <View style={{flexDirection:'row',flex:0.8,paddingTop:'3%'}}>
         <View>
           <Text style={{fontSize:35}}>GitHub</Text>
         </View>
