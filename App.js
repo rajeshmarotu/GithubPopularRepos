@@ -2,12 +2,11 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, ActivityIndicator,ImageBackground, Image, FlatList, TouchableOpacity, Linking } from 'react-native';
 import { List, ListItem, Icon } from 'react-native-elements';
 
-
 import { Header } from './src/components/Header.component';
 
 const options = {
    headers: {
-            'Authorization': 'token 2655bdfb22653d1f4a5f4c08a819fa62479a1a7e'
+            'Authorization': 'token YOUR_GITHUB_PERSONAL_ACCESS_TOKEN'
           }
 }
 
@@ -15,10 +14,7 @@ export default class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      data:[],
       loading:'initial',
-      error:'',
-      length: 0,
       languageRepos:{},
       loadSplashScreen:false,
       isClicked:{
@@ -36,13 +32,6 @@ export default class App extends Component {
           this.stopRenderSplash();
           this.loadData()
       },2000);
-  }
-
-  componentWillReceiveProps(newProps){
-    console.log(newProps);
-    // this.setState({
-    //     location: newProps.location
-    // })
   }
 
   stopRenderSplash(){
