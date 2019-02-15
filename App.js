@@ -8,6 +8,7 @@ const deviceWidth = Dimensions.get('window').width;
 
 
 
+
 const Header = () => {
   return (
     <View style={[styles.shadowStyle,{flexDirection:'row',paddingHorizontal:'5%',paddingTop:'5%'}]}>
@@ -33,11 +34,12 @@ const Header = () => {
   )
 }
 
-const fetchOptions = {
+const options = {
    headers: {
-            'Authorization': 'token cdf9358a6530428820c823347a670c3f4a3dfa5',
+            'Authorization': 'token 8b097b59f42f44bf90e1c85ba77497ffc1acab01',
         }
 }
+
 export default class App extends Component {
   constructor(props){
     super(props);
@@ -55,6 +57,7 @@ export default class App extends Component {
 
       ]
     }
+    this.repoView = [];
   }
 
   componentDidMount(){
@@ -64,21 +67,26 @@ export default class App extends Component {
       },2000);
   }
 
+  componentWillReceiveProps(newProps){
+    console.log(newProps);
+    // this.setState({
+    //     location: newProps.location
+    // })
+  }
+
   stopRenderSplash(){
     this.setState({loadSplashScreen:true,loading:true})
   }
 
   loadData(){
-      fetch('https://api.github.com/search/repositories?q=stars%3A>1000&sort=stars&order=desc&per_page=10',{headers:{'Authorization':'token 8cdf9358a6530428820c823347a670c3f4a3dfa5'}}).then(res=>res.json()).then(results=>{
+      fetch('https://api.github.com/search/repositories?q=stars%3A>1000&sort=stars&order=desc&per_page=10',options).then(res=>res.json()).then(results=>{
 
         var urls=[]
         results['items'].forEach( result => {
-            urls.push(fetch(result.languages_url,{headers:{'Authorization':'token 8cdf9358a6530428820c823347a670c3f4a3dfa5'}}).then(r => r.json()));
+            urls.push(fetch(result.languages_url,options).then(r => r.json()));
         })
-
         return urls;
       }).then(urls => {
-        // console.log(urls);
         var data = {};
         var keys=[];
         return Promise.all(
@@ -102,7 +110,7 @@ export default class App extends Component {
         });
       }).then((langs)=>{
 
-          fetch('https://api.github.com/search/repositories?q=topic%3A'+langs[0]+'&type=Repositories&sort=stars&order=desc&per_page=10',{headers:{'Authorization':'token 8cdf9358a6530428820c823347a670c3f4a3dfa5'}})
+          fetch('https://api.github.com/search/repositories?q=topic%3A'+langs[0]+'&type=Repositories&sort=stars&order=desc&per_page=10',options)
           .then(r => r.json())
           .then(topLangData=>{
             var topLangItems = topLangData['items'];
@@ -152,26 +160,16 @@ export default class App extends Component {
 
 
   renderRepositoriesLanguageWise = ({ item }) =>{
+
     var returnValue = [];
-    var index= 0;
-
-    for(var language in item){
-      returnValue.push(this.renderItem(item[language]["items"],language,index));
-      index+=1;
-    }
-
-    return <View style={{flexDirection:'column'}}>
-            {
-              returnValue
-            }
-           </View>;
-  }
-
-  onAuthorPress = () =>{
-    return <WebView/>
+    var index = this.state.dataSource.map(e=>e.language).indexOf(item.language);
+    console.log('renderRepo'+index);
+    returnValue.push(this.renderItem(item["items"],item.language,index));
+    return returnValue;
   }
 
   buildRow = (items,language,row_no) => {
+    console.log('buildRow'+language);
     var cols = []
     for(var i = 0; i<2;i++){
       var position = row_no*2+i;
@@ -182,23 +180,25 @@ export default class App extends Component {
       if(position<10){
         cols.push(
             <View style={{flex:0.5}} key={language+"_"+row_no+"_"+i}>
-              <ListItem
-                title={
-                  <TouchableOpacity onPress={()=> Linking.openURL('https://google.com') }>
-                    <Text style={{color:'black',fontWeight:'500'}}>{items[position].title}</Text>
-                  </TouchableOpacity>
+              {
+                <ListItem
+                  title={
+                    <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) }>
+                      <Text style={{color:'black',fontWeight:'500'}}>{items[position].name}</Text>
+                    </TouchableOpacity>
+                    }
+                  subtitle={
+                    <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) }>
+                      <Text style={{color:'blue'}}>{items[position]['owner'].login}</Text>
+                    </TouchableOpacity>
                   }
-                subtitle={
-                  <TouchableOpacity onPress={()=> Linking.openURL('https://google.com') }>
-                    <Text style={{color:'blue'}}>{items[position].owner_name}</Text>
-                  </TouchableOpacity>
-                }
-                leftAvatar={{
-                  source: items[position].icon_url && { uri: items[position].icon_url },
-                  title: items[position].title[0]
-                }}
-                contentContainerStyle={{width:'100%',height:'7%',paddingRight:`${odd}`==true?1:0}}
-              />
+                  leftAvatar={{
+                    source: items[position]['owner'].avatar_url && { uri: items[position]['owner'].avatar_url },
+                    title: items[position].name[0]
+                  }}
+                  contentContainerStyle={{width:'100%',height:'7%',paddingRight:`${odd}`==true?1:0}}
+                />
+              }
             </View>
         )
       }
@@ -212,22 +212,46 @@ export default class App extends Component {
       );
   }
 
-  renderItem = (items,language,index ) => {
+
+  toggleRepos(language,index){
+      let isClicked = Object.assign({}, this.state.isClicked);
+      var height = '7%',opacity = 1;
+
+      if(isClicked[language]){
+        height=0;
+        opacity=0;
+      }
+      this.repoView[index].setNativeProps({width:'100%',height:height,opacity:opacity });
+      isClicked[language]=!isClicked[language];
+      this.setState({isClicked:isClicked});
+
+  }
+
+  renderItem = (items,language, index) => {
+    console.log("renderItem"+index);
     var l = [0,1,2,3,4]
     return (
         <View  key={language} style={{flexDirection:'column',paddingVertical:'2%'}}>
-          <View style={{flex:0.2}}>
-            <Text style={{fontSize:24,fontWeight:'600'}}>#{index+1}&nbsp;&nbsp;{language}</Text>
+          <View style={{flex:0.2,backgroundColor:'#cdcdcd'}}>
+            <TouchableOpacity onPress={()=> this.toggleRepos(language,index)}>
+              <Text style={{fontSize:24,fontWeight:'600',color:'#fff'}}>#{index+1}&nbsp;&nbsp;{language}</Text>
+            </TouchableOpacity>
           </View>
-          <View key={language+"#"+index} style={{flex:0.8,flexDirection:'column'}}>
-            {
-              l.map((row_no)=>{
-                return (
-                    this.buildRow(items,language,row_no)
-                )
-              })
-            }
-          </View>
+
+              <View key={language+"#repos"} ref={(ref) => this.repoView[index] = ref}  style={{flex:0.8,flexDirection:'column'}}>
+                {
+                  items.length!=0 && l.map((row_no)=>{
+                    return (
+                        this.buildRow(items,language,row_no)
+                    )
+                  })
+                }
+                {
+                  items.length==0 && this.state.isClicked[language]==true && (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  )
+                }
+              </View>
         </View>
       )
   }
@@ -236,7 +260,7 @@ export default class App extends Component {
   render(){
 
     const { loading,dataSource,isClicked } = this.state;
-
+    // console.log(isClicked);
     if(!this.state.loadSplashScreen){
       return (
         <View style={[styles.container,{justifyContent:'center',alignItems:'center'}]}>
@@ -259,14 +283,14 @@ export default class App extends Component {
             <Header />
           </View>
           <View style={{flex:0.85,flexDirection:'column'}}>
-            {
-            //   <FlatList
-            //   keyExtractor={this.keyExtractor}
-            //   data={this.state.dataSource}
-            //   renderItem={this.renderRepositoriesLanguageWise}
-            // />
-            }
-            <Text>Content goes here</Text>
+            <View style={{flexDirection:'column'}}>
+              <FlatList
+                keyExtractor={this.keyExtractor}
+                data={this.state.dataSource}
+                renderItem={this.renderRepositoriesLanguageWise}
+                extraData={this.state}
+              />
+            </View>
           </View>
         </View>
       )
