@@ -1,43 +1,13 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, ActivityIndicator,ImageBackground, Image, FlatList, TouchableOpacity, Linking, Dimensions } from 'react-native';
+import {Platform, StyleSheet, Text, View, ActivityIndicator,ImageBackground, Image, FlatList, TouchableOpacity, Linking } from 'react-native';
 import { List, ListItem } from 'react-native-elements';
 
-
-const deviceHeight = Dimensions.get('window').height;
-const deviceWidth = Dimensions.get('window').width;
-
-
-
-
-const Header = () => {
-  return (
-    <View style={[styles.shadowStyle,{flexDirection:'row',paddingHorizontal:'5%',paddingTop:'5%'}]}>
-      <View style={{flex:0.2}}>
-        <Image
-          style={{width:'70%', height:'60%'}}
-          source={{uri: 'https://facebook.github.io/react-native/docs/assets/favicon.png'}}
-        />
-      </View>
-      <View style={{flexDirection:'row',flex:0.8}}>
-        <View>
-          <Text style={{fontSize:35}}>GitHub</Text>
-        </View>
-        <View>
-          <Text style={{fontSize:18,paddingVertical:'6%',paddingHorizontal:'5%'}}>Popular</Text>
-        </View>
-        <View>
-          <Text style={{fontSize:18,paddingVertical:'6%'}}>Repositories</Text>
-        </View>
-
-      </View>
-    </View>
-  )
-}
+import { Header } from './src/components/Header.component';
 
 const options = {
    headers: {
-            'Authorization': 'token 8b097b59f42f44bf90e1c85ba77497ffc1acab01',
-        }
+            'Authorization': 'token YOUR_PERSONAL_ACCESS_TOKEN'
+          }
 }
 
 export default class App extends Component {
@@ -80,7 +50,7 @@ export default class App extends Component {
 
   loadData(){
       fetch('https://api.github.com/search/repositories?q=stars%3A>1000&sort=stars&order=desc&per_page=10',options).then(res=>res.json()).then(results=>{
-
+        console.log(results);
         var urls=[]
         results['items'].forEach( result => {
             urls.push(fetch(result.languages_url,options).then(r => r.json()));
@@ -227,13 +197,31 @@ export default class App extends Component {
 
   }
 
+  loadRepoData(length,language,index){
+    if(length==0){
+
+      fetch('https://api.github.com/search/repositories?q=topic%3A'+language+'&type=Repositories&sort=stars&order=desc&per_page=10',options)
+      .then(r => r.json())
+      .then(langData=>{
+        var langItems = langData['items'];
+        const newData = [...this.state.dataSource]
+        newData[index].items=langItems;
+        newData[index].isLoaded=true;
+        this.setState({dataSource:newData})
+      })
+
+    }else{
+      return;
+    }
+  }
+
   renderItem = (items,language, index) => {
     console.log("renderItem"+index);
     var l = [0,1,2,3,4]
     return (
         <View  key={language} style={{flexDirection:'column',paddingVertical:'2%'}}>
           <View style={{flex:0.2,backgroundColor:'#cdcdcd'}}>
-            <TouchableOpacity onPress={()=> this.toggleRepos(language,index)}>
+            <TouchableOpacity onPress={()=> {this.toggleRepos(language,index);this.loadRepoData(items.length,language,index)}}>
               <Text style={{fontSize:24,fontWeight:'600',color:'#fff'}}>#{index+1}&nbsp;&nbsp;{language}</Text>
             </TouchableOpacity>
           </View>
@@ -247,7 +235,7 @@ export default class App extends Component {
                   })
                 }
                 {
-                  items.length==0 && this.state.isClicked[language]==true && (
+                  items.length==0 && this.state.isClicked[language]==true && this.state.dataSource.filter(item=>{ return item.language==language})[0].isLoaded == false &&(
                     <ActivityIndicator size="large" color="#0000ff" />
                   )
                 }
@@ -308,16 +296,6 @@ const styles = StyleSheet.create({
   },
   noMargin: {
     flex:0.50
-  },
-  horizontal: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 10
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
   },
   shadowStyle: {
     borderWidth: 1,
