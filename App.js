@@ -33,6 +33,11 @@ const Header = () => {
   )
 }
 
+const fetchOptions = {
+   headers: {
+            'Authorization': 'token cdf9358a6530428820c823347a670c3f4a3dfa5',
+        }
+}
 export default class App extends Component {
   constructor(props){
     super(props);
@@ -43,183 +48,12 @@ export default class App extends Component {
       length: 0,
       languageRepos:{},
       loadSplashScreen:false,
-      dataSource:[
-       {
-         Javascript:{
-           count:2000,
-           language_icon:'./assets/images/github.jpg',
-           items:[
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'freeCodeCamp',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/Repository2',
-               title:'Repository 2',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'Repository 3',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'freeCodeCamp',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/Repository2',
-               title:'Repository 2',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'Repository 3',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'freeCodeCamp',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/Repository2',
-               title:'Repository 2',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'Repository 3',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'Repository 3',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             }
-           ]
-         },
-         Python:{
-           count:1800,
-           language_icon:'./assets/images/github.jpg',
-           items:[
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'freeCodeCamp',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/Repository2',
-               title:'Repository 2',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'Repository 3',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'freeCodeCamp',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/Repository2',
-               title:'Repository 2',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'Repository 3',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'freeCodeCamp',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/Repository2',
-               title:'Repository 2',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'Repository 3',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             },
-             {
-               project_url:'https://github.com/freeCodeCamp/freeCodeCamp',
-               title:'Repository 3',
-               stars:200,
-               icon_url:'./assets/images/github.jpg',
-               owner_name:'Rajesh Marotu',
-               owner_url:'https://github.com/freeCodeCamp',
-             }
-           ]
-         }
+      isClicked:{
 
-       }
-     ]
+      },
+      dataSource:[
+
+      ]
     }
   }
 
@@ -235,9 +69,62 @@ export default class App extends Component {
   }
 
   loadData(){
-    setTimeout( () => {
-        this.setState({loading:false})
-    },2000);
+      fetch('https://api.github.com/search/repositories?q=stars%3A>1000&sort=stars&order=desc&per_page=10',{headers:{'Authorization':'token 8cdf9358a6530428820c823347a670c3f4a3dfa5'}}).then(res=>res.json()).then(results=>{
+
+        var urls=[]
+        results['items'].forEach( result => {
+            urls.push(fetch(result.languages_url,{headers:{'Authorization':'token 8cdf9358a6530428820c823347a670c3f4a3dfa5'}}).then(r => r.json()));
+        })
+
+        return urls;
+      }).then(urls => {
+        // console.log(urls);
+        var data = {};
+        var keys=[];
+        return Promise.all(
+          urls
+        ).then(languages=>{
+          languages.forEach(item=>{
+            for(var language in item){
+              if(language in data){
+                data[language]+=item[language]
+              }else{
+                data[language]=item[language]
+                keys.push(language)
+              }
+            }
+          })
+          return keys;
+        }).then(keys=>{
+          var mostUsedLanguages=[];
+          mostUsedLanguages = keys.sort(function(a,b){return data[b]-data[a]});
+          return mostUsedLanguages;
+        });
+      }).then((langs)=>{
+
+          fetch('https://api.github.com/search/repositories?q=topic%3A'+langs[0]+'&type=Repositories&sort=stars&order=desc&per_page=10',{headers:{'Authorization':'token 8cdf9358a6530428820c823347a670c3f4a3dfa5'}})
+          .then(r => r.json())
+          .then(topLangData=>{
+            var topLangItems = topLangData['items'];
+            // console.log(topLangItems);
+            var Data = this.state.dataSource;
+            var isClicked=[]
+            langs.slice(0,10).forEach((lang,i)=>{
+              isClicked[lang]= (i==0)?true:false;
+              Data.push({
+                language:lang,
+                isLoaded:false,
+                items:i==0?(topLangItems):[]
+              })
+            })
+            this.setState({
+              isClicked:isClicked,
+              dataSource:Data,
+              loading:false
+            })
+          })
+
+      })
   }
 
   renderSplashScreen(){
@@ -348,7 +235,7 @@ export default class App extends Component {
 
   render(){
 
-    const { loading } = this.state;
+    const { loading,dataSource,isClicked } = this.state;
 
     if(!this.state.loadSplashScreen){
       return (
@@ -372,11 +259,14 @@ export default class App extends Component {
             <Header />
           </View>
           <View style={{flex:0.85,flexDirection:'column'}}>
-            <FlatList
-              keyExtractor={this.keyExtractor}
-              data={this.state.dataSource}
-              renderItem={this.renderRepositoriesLanguageWise}
-            />
+            {
+            //   <FlatList
+            //   keyExtractor={this.keyExtractor}
+            //   data={this.state.dataSource}
+            //   renderItem={this.renderRepositoriesLanguageWise}
+            // />
+            }
+            <Text>Content goes here</Text>
           </View>
         </View>
       )
