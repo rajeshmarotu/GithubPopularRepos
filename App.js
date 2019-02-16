@@ -6,95 +6,284 @@ import { Header } from './src/components/Header.component';
 
 const options = {
    headers: {
-            'Authorization': 'token YOUR_GITHUB_PERSONAL_ACCESS_TOKEN'
+            'Authorization': 'token 8b1abaebc88915a732ec876fbdd3e041cf1742ad'
           }
 }
 
 export default class App extends Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      loading:'initial',
-      languageRepos:{},
-      loadSplashScreen:false,
-      isClicked:{
 
-      },
-      dataSource:[
+          constructor(props){
+            super(props);
+            this.state = {
+              loading:'initial',
+              languageRepos:{},
+              loadSplashScreen:false,
+              isClicked:{
 
-      ]
-    }
-    this.repoView = [];
-  }
+              },
+              dataSource:[
 
-  componentDidMount(){
-      setTimeout( () => {
-          this.stopRenderSplash();
-          this.loadData()
-      },2000);
-  }
-
-  stopRenderSplash(){
-    this.setState({loadSplashScreen:true,loading:true})
-  }
-
-  loadData(){
-      fetch('https://api.github.com/search/repositories?q=stars%3A>1000&sort=stars&order=desc&per_page=10',options).then(res=>res.json()).then(results=>{
-        console.log(results);
-        var urls=[]
-        results['items'].forEach( result => {
-            urls.push(fetch(result.languages_url,options).then(r => r.json()));
-        })
-        return urls;
-      }).then(urls => {
-        var data = {};
-        var keys=[];
-        return Promise.all(
-          urls
-        ).then(languages=>{
-          languages.forEach(item=>{
-            for(var language in item){
-              if(language in data){
-                data[language]+=item[language]
-              }else{
-                data[language]=item[language]
-                keys.push(language)
-              }
+              ]
             }
-          })
-          return keys;
-        }).then(keys=>{
-          var mostUsedLanguages=[];
-          mostUsedLanguages = keys.sort(function(a,b){return data[b]-data[a]});
-          return mostUsedLanguages;
-        });
-      }).then((langs)=>{
+            this.repoView = [];
+          }
 
-          fetch('https://api.github.com/search/repositories?q=topic%3A'+langs[0]+'&type=Repositories&sort=stars&order=desc&per_page=10',options)
-          .then(r => r.json())
-          .then(topLangData=>{
-            var topLangItems = topLangData['items'];
-            // console.log(topLangItems);
-            var Data = this.state.dataSource;
-            var isClicked=[]
-            langs.slice(0,10).forEach((lang,i)=>{
-              isClicked[lang]= (i==0)?true:false;
-              Data.push({
-                language:lang,
-                isLoaded:false,
-                items:i==0?(topLangItems):[]
+
+          componentDidMount(){
+              setTimeout( () => {
+                  this.stopRenderSplash();
+                  this.loadData()
+              },2000);
+          }
+
+          /*
+            Stop Displaying Splash Screen After 2Secs
+          */
+          stopRenderSplash(){
+            this.setState({loadSplashScreen:true,loading:true})
+          }
+
+          /*
+            Method To Fetch Data From GitHub API
+          */
+          loadData(){
+              fetch('https://api.github.com/search/repositories?q=stars%3A>0&sort=stars&order=desc&per_page=10',options)
+              .then(res=>res.json())
+              .then(results=>{
+
+                /*
+                  Get All Repositories With Most Stars (10 Repos )
+                */
+                var urls=[]
+                results['items'].forEach( result => {
+                    urls.push(fetch(result.languages_url,options).then(r => r.json()));
+                })
+
+                /*
+                  Return All URL for Languages Of Repositories
+                */
+                return urls;
               })
-            })
-            this.setState({
-              isClicked:isClicked,
-              dataSource:Data,
-              loading:false
-            })
-          })
+              .then(urls => {
+                var data = {};
+                var keys=[];
+                return Promise.all(urls)
+                              .then(languages=>{
+                                /*
+                                  Sum up the values of each language from All Top repositories.
+                                */
+                                languages.forEach(item=>{
+                                  for(var language in item){
+                                    if(language in data){
+                                      data[language]+=item[language]
+                                    }else{
+                                      data[language]=item[language]
+                                      keys.push(language)
+                                    }
+                                  }
+                                })
+                                return keys;
+                              })
+                              .then(keys=>{
 
-      })
+                                /*
+                                  Sort languages based on above computed value -- Descending order
+                                */
+                                var mostUsedLanguages=[];
+                                mostUsedLanguages = keys.sort(function(a,b){return data[b]-data[a]});
+                                return mostUsedLanguages;
+                              });
+              })
+              .then((langs)=>{
+
+                  fetch('https://api.github.com/search/repositories?q=topic%3A'+langs[0]+'&type=Repositories&sort=stars&order=desc&per_page=10',options)
+                  .then(r => r.json())
+                  .then(topLangData=>{
+                    var topLangItems = topLangData['items'];
+                    // console.log(topLangItems);
+                    var Data = this.state.dataSource;
+                    var isClicked=[]
+                    langs.slice(0,10).forEach((lang,i)=>{
+                      isClicked[lang]= (i==0)?true:false;
+                      Data.push({
+                        language:lang,
+                        isLoaded:false,
+                        items:i==0?(topLangItems):[]
+                      })
+                    })
+                    this.setState({
+                      isClicked:isClicked,
+                      dataSource:Data,
+                      loading:false
+                    })
+                  })
+
+              })
+          }
+
+
+        /*
+          Build a row containing 2 columns. Each column contains user_pic, repository_name, owner_name
+          with availabilty to open it in browser
+        */
+        buildRow = (items,language,row_no) => {
+          var cols = []
+
+          for(var i = 0; i<2;i++){
+            var position = row_no*2+i;
+            var odd = true;
+            if((position+1)%2==0){
+              odd=false;
+            }
+            if(position<10){
+              cols.push(
+                  <View style={{flex:0.5}} key={language+"_"+row_no+"_"+i}>
+                    {
+                      <ListItem
+                        title={
+                          <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) }>
+                            <Text style={{color:'black',fontWeight:'500'}}>{items[position].name}</Text>
+                          </TouchableOpacity>
+                          }
+                        subtitle={
+                          <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) }>
+                            <Text style={{color:'blue'}}>{items[position]['owner'].login}</Text>
+                          </TouchableOpacity>
+                        }
+                        leftAvatar={{
+                          source: items[position]['owner'].avatar_url && { uri: items[position]['owner'].avatar_url },
+                          title: items[position].name[0]
+                        }}
+                        contentContainerStyle={{width:'100%',height:'7%',paddingRight:`${odd}`==true?1:0}}
+                      />
+                    }
+                  </View>
+              )
+            }
+          }
+          return (
+              <View key={language+"_"+row_no} style={{flexDirection:'row',paddingVertical:'1%'}}>
+                  {
+                    cols
+                  }
+              </View>
+            );
+        }
+
+        /*
+          Toggle Repository With Option To View Top Repositories Of A Language Or Minimize.
+        */
+        toggleRepos(language,index){
+            let isClicked = Object.assign({}, this.state.isClicked);
+            var height = '7%',opacity = 1;
+            if(isClicked[language]){
+              height=0;
+              opacity=0;
+            }
+
+            /*
+              Hide View By Using Ref.
+            */
+            this.repoView[index].setNativeProps({width:'100%',height:height,opacity:opacity });
+            isClicked[language]=!isClicked[language];
+            this.setState({isClicked:isClicked});
+        }
+
+
+      /*
+        Load Repository Data Into State and Set isLoaded Status To TRUE
+      */
+      loadRepoData(length,language,index){
+        /* If Data Is Previously Not Loaded */
+        if(length==0){
+          fetch('https://api.github.com/search/repositories?q=topic%3A'+language+'&type=Repositories&sort=stars&order=desc&per_page=10',options)
+          .then(r => r.json())
+          .then(langData=>{
+            var langItems = langData['items'];
+            const newData = [...this.state.dataSource]
+            newData[index].items=langItems;
+            newData[index].isLoaded=true;
+            this.setState({dataSource:newData})
+          })
+        }else{
+          return;
+        }
+      }
+
+
+
+    /*
+      Render Top 10 Repositories Of A Language. Contains Language Header and 5 Repository Rows Each Containing 2 Columns
+    */
+
+    renderItem = (items,language, index) => {
+      console.log("renderItem"+index);
+      var l = [0,1,2,3,4]
+      return (
+          <View  key={language} style={{flexDirection:'column',paddingTop:'1%'}}>
+
+            <View style={{flex:0.2,backgroundColor:'#cdcdcd',flexDirection:'row'}}>
+
+              <View style={{flex:0.8,paddingVertical:'3%',paddingLeft:'2%'}}>
+                <Text style={{fontSize:24,fontWeight:'600',color:'#fff'}}>#{index+1}&nbsp;&nbsp;{language}</Text>
+              </View>
+
+              {/*   On Clicking Chevron-Down Icon Toggle Display and Load Repository Data Of Language If Not Loaded */}
+
+              <View style={{flex:0.2,alignItems:'center'}}>
+                <Icon
+                  raised
+                  name={this.state.isClicked[language]==true?'chevron-up':'chevron-down'}
+                  type='font-awesome'
+                  color={this.state.isClicked[language]==true?'black':'#cdcdcd'}
+                  size={20}
+                  onPress={() => { this.toggleRepos(language,index);this.loadRepoData(items.length,language,index) }} />
+              </View>
+
+            </View>
+
+            {/* Rows */}
+            <View key={language+"#repos"} ref={(ref) => this.repoView[index] = ref}  style={{flex:0.8,flexDirection:'column'}}>
+
+              {/* If Language's Repositories Are Loaded and have length > 0 Build 5 Rows */}
+              {
+                items.length!=0 && this.state.isClicked[language]==true && l.map((row_no)=>{
+                  return (
+                      this.buildRow(items,language,row_no)
+                  )
+                })
+              }
+
+              {/* Else Show Loading Indicator Till Data Gets Loaded */}
+              {
+                items.length==0 && this.state.isClicked[language]==true && this.state.dataSource.filter(item=>{ return item.language==language})[0].isLoaded == false &&(
+                  <ActivityIndicator size="large" color="#0000ff"/>
+                )
+              }
+            </View>
+
+          </View>
+        )
+    }
+
+
+  /*
+    Render Repositories from Different Programming Languages and Append to View
+  */
+  renderRepositoriesLanguageWise = ({ item }) =>{
+
+    var returnValue = [];
+    var index = this.state.dataSource.map(e=>e.language).indexOf(item.language);
+    console.log('renderRepo'+index);
+    returnValue.push(this.renderItem(item["items"],item.language,index));
+    return returnValue;
   }
 
+  keyExtractor = (item, index) => index
+
+  /*
+    Render Splash Screen Method
+  */
   renderSplashScreen(){
     return (
       <ImageBackground source={require('./assets/images/white_bg.jpg')} style={{width: '100%', height: '100%'}}>
@@ -115,144 +304,13 @@ export default class App extends Component {
     )
   }
 
-  keyExtractor = (item, index) => index
-
-
-
-  renderRepositoriesLanguageWise = ({ item }) =>{
-
-    var returnValue = [];
-    var index = this.state.dataSource.map(e=>e.language).indexOf(item.language);
-    console.log('renderRepo'+index);
-    returnValue.push(this.renderItem(item["items"],item.language,index));
-    return returnValue;
-  }
-
-  buildRow = (items,language,row_no) => {
-    console.log('buildRow'+language);
-    var cols = []
-    for(var i = 0; i<2;i++){
-      var position = row_no*2+i;
-      var odd = true;
-      if((position+1)%2==0){
-        odd=false;
-      }
-      if(position<10){
-        cols.push(
-            <View style={{flex:0.5}} key={language+"_"+row_no+"_"+i}>
-              {
-                <ListItem
-                  title={
-                    <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) }>
-                      <Text style={{color:'black',fontWeight:'500'}}>{items[position].name}</Text>
-                    </TouchableOpacity>
-                    }
-                  subtitle={
-                    <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) }>
-                      <Text style={{color:'blue'}}>{items[position]['owner'].login}</Text>
-                    </TouchableOpacity>
-                  }
-                  leftAvatar={{
-                    source: items[position]['owner'].avatar_url && { uri: items[position]['owner'].avatar_url },
-                    title: items[position].name[0]
-                  }}
-                  contentContainerStyle={{width:'100%',height:'7%',paddingRight:`${odd}`==true?1:0}}
-                />
-              }
-            </View>
-        )
-      }
-    }
-    return (
-        <View key={language+"_"+row_no} style={{flexDirection:'row',paddingVertical:'1%'}}>
-            {
-              cols
-            }
-        </View>
-      );
-  }
-
-
-  toggleRepos(language,index){
-      let isClicked = Object.assign({}, this.state.isClicked);
-      var height = '7%',opacity = 1;
-
-      if(isClicked[language]){
-        height=0;
-        opacity=0;
-      }
-      this.repoView[index].setNativeProps({width:'100%',height:height,opacity:opacity });
-      isClicked[language]=!isClicked[language];
-      this.setState({isClicked:isClicked});
-
-  }
-
-  loadRepoData(length,language,index){
-    if(length==0){
-
-      fetch('https://api.github.com/search/repositories?q=topic%3A'+language+'&type=Repositories&sort=stars&order=desc&per_page=10',options)
-      .then(r => r.json())
-      .then(langData=>{
-        var langItems = langData['items'];
-        const newData = [...this.state.dataSource]
-        newData[index].items=langItems;
-        newData[index].isLoaded=true;
-        this.setState({dataSource:newData})
-      })
-
-    }else{
-      return;
-    }
-  }
-
-  renderItem = (items,language, index) => {
-    console.log("renderItem"+index);
-    var l = [0,1,2,3,4]
-    return (
-        <View  key={language} style={{flexDirection:'column',paddingTop:'1%'}}>
-          <View style={{flex:0.2,backgroundColor:'#cdcdcd',flexDirection:'row'}}>
-            <View style={{flex:0.8,paddingVertical:'3%',paddingLeft:'2%'}}>
-              <Text style={{fontSize:24,fontWeight:'600',color:'#fff'}}>#{index+1}&nbsp;&nbsp;{language}</Text>
-            </View>
-            <View style={{flex:0.2,alignItems:'center'}}>
-              <Icon
-                raised
-                name={this.state.isClicked[language]==true?'chevron-up':'chevron-down'}
-                type='font-awesome'
-                color={this.state.isClicked[language]==true?'black':'#cdcdcd'}
-                size={20}
-                onPress={() => { this.toggleRepos(language,index);this.loadRepoData(items.length,language,index) }} />
-            </View>
-            {
-              // <TouchableOpacity onPress={()=> {this.toggleRepos(language,index);this.loadRepoData(items.length,language,index)}}>
-              //   <Text style={{fontSize:24,fontWeight:'600',color:'#fff'}}>#{index+1}&nbsp;&nbsp;{language}</Text>
-              // </TouchableOpacity>
-            }
-          </View>
-
-              <View key={language+"#repos"} ref={(ref) => this.repoView[index] = ref}  style={{flex:0.8,flexDirection:'column'}}>
-                {
-                  items.length!=0 && l.map((row_no)=>{
-                    return (
-                        this.buildRow(items,language,row_no)
-                    )
-                  })
-                }
-                {
-                  items.length==0 && this.state.isClicked[language]==true && this.state.dataSource.filter(item=>{ return item.language==language})[0].isLoaded == false &&(
-                    <ActivityIndicator size="large" color="#0000ff"/>
-                  )
-                }
-              </View>
-        </View>
-      )
-  }
-
 
   render(){
 
-    const { loading,dataSource,isClicked } = this.state;
-    // console.log(isClicked);
+    const { loading, dataSource } = this.state;
+    /*
+      Load Splash Screen
+    */
     if(!this.state.loadSplashScreen){
       return (
         <View style={[styles.container,{justifyContent:'center',alignItems:'center'}]}>
@@ -261,6 +319,9 @@ export default class App extends Component {
       )
     }
 
+    /*
+      Show Loading Indicator
+    */
     if( this.state.loadSplashScreen && loading == true ){
       return(
         <View style={[styles.container,{justifyContent:'center',alignItems:'center'}]}>
@@ -268,6 +329,10 @@ export default class App extends Component {
         </View>
       )
     }
+
+    /*
+      After loading display Default screen with FlatList
+    */
     if( loading == false ){
       return(
         <View style={[styles.container,{flex:1,flexDirection:'column'}]}>
@@ -278,7 +343,7 @@ export default class App extends Component {
             <View style={{flexDirection:'column'}}>
               <FlatList
                 keyExtractor={this.keyExtractor}
-                data={this.state.dataSource}
+                data={dataSource}
                 renderItem={this.renderRepositoriesLanguageWise}
                 extraData={this.state}
                 showsVerticalScrollIndicator={false}
