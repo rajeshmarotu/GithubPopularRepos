@@ -6,7 +6,7 @@ import { Header } from './src/components/Header.component';
 
 const options = {
    headers: {
-            'Authorization': 'token 8b1abaebc88915a732ec876fbdd3e041cf1742ad'
+            'Authorization': 'token YOUR_GITHUB_PERSONAL_ACCESS_TOKEN'
           }
 }
 
