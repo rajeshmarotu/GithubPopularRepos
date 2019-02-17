@@ -6,7 +6,7 @@ import { Header } from './src/components/Header.component';
 
 const options = {
    headers: {
-            'Authorization': 'token YOUR_GITHUB_PERSONAL_ACCESS_TOKEN'
+            'Authorization': 'token 1275cfc2e386f62c80c57e42438e1723726be005'
           }
 }
 
@@ -72,6 +72,8 @@ export default class App extends Component {
                                 /*
                                   Sum up the values of each language from All Top repositories.
                                 */
+                                console.log("$$$$$$");
+                                console.log(languages);
                                 languages.forEach(item=>{
                                   for(var language in item){
                                     if(language in data){
@@ -85,7 +87,10 @@ export default class App extends Component {
                                 return keys;
                               })
                               .then(keys=>{
+                                console.log(keys);
 
+                                console.log("######");
+                                console.log(data);
                                 /*
                                   Sort languages based on above computed value -- Descending order
                                 */
@@ -121,7 +126,22 @@ export default class App extends Component {
               })
           }
 
+        roundToTwo = (num) =>{
+              return +(Math.round(num + "e+2")  + "e-2");
+        }
 
+        handleStars=(count)=>{
+          console.log(count);
+          var stars = ""
+          if(count>=1000 && count<1000000){
+            stars=this.roundToTwo(count/1000)+"K"
+          }else if (count>1000000) {
+            stars=this.roundToTwo(count/1000000)+"M"
+          }else{
+            stars=count
+          }
+          return stars;
+        }
         /*
           Build a row containing 2 columns. Each column contains user_pic, repository_name, owner_name
           with availabilty to open it in browser
@@ -137,24 +157,46 @@ export default class App extends Component {
             }
             if(position<10){
               cols.push(
-                  <View style={{flex:0.5}} key={language+"_"+row_no+"_"+i}>
+                  <View style={{flex:0.5,width:'100%',height:'100%'}} key={language+"_"+row_no+"_"+i}>
                     {
                       <ListItem
                         title={
-                          <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) }>
-                            <Text style={{color:'black',fontWeight:'500'}}>{items[position].name}</Text>
+                          <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) } style={{}}>
+                            <Text style={{color:'black',fontWeight:'500',width:'100%'}}>
+                            { ((items[position].name).length > 15) ?
+                              (((items[position].name).substring(0,15-2)) + '..') :
+                              items[position].name }
+                            </Text>
                           </TouchableOpacity>
                           }
                         subtitle={
-                          <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) }>
-                            <Text style={{color:'blue'}}>{items[position]['owner'].login}</Text>
-                          </TouchableOpacity>
+                          <View style={{flexDirection:'column'}}>
+                            <TouchableOpacity onPress={()=> Linking.openURL(items[position]['owner'].html_url) } style={{flex:0.6}}>
+                              <Text style={{color:'blue'}}>{items[position]['owner'].login}</Text>
+                            </TouchableOpacity>
+                            <View style={{flexDirection:'row',flex:0.4,paddingTop:'1%'}}>
+                              <View style={{flex:0.3}}>
+                                <Icon
+                                  name="star"
+                                  type='font-awesome'
+                                  color='black'
+                                  size={15}
+                                  iconStyle={{alignSelf:'flex-start'}}
+                                  onPress={() => { this.toggleRepos(language,index);this.loadRepoData(items.length,language,index) }} />
+                              </View>
+                              <View style={{flex:0.7}}>
+                                <Text style={{color:'black',alignSelf:'flex-start'}}>{this.handleStars(items[position].stargazers_count)}</Text>
+                              </View>
+                            </View>
+                          </View>
+
+
                         }
                         leftAvatar={{
                           source: items[position]['owner'].avatar_url && { uri: items[position]['owner'].avatar_url },
                           title: items[position].name[0]
                         }}
-                        contentContainerStyle={{width:'100%',height:'7%',paddingRight:`${odd}`==true?1:0}}
+                        contentContainerStyle={{width:'100%',height:'100%'}}
                       />
                     }
                   </View>
@@ -162,7 +204,7 @@ export default class App extends Component {
             }
           }
           return (
-              <View key={language+"_"+row_no} style={{flexDirection:'row',paddingVertical:'1%'}}>
+              <View key={language+"_"+row_no} style={{flexDirection:'row',flex:0.2,flexGrow: 1}}>
                   {
                     cols
                   }
