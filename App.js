@@ -6,7 +6,7 @@ import { Header } from './src/components/Header.component';
 
 const options = {
    headers: {
-            'Authorization': 'token 1275cfc2e386f62c80c57e42438e1723726be005'
+            'Authorization': 'token 91c45abf55c7e7279d6bc5fa7f30c9e3f502929a'
           }
 }
 
